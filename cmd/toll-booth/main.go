@@ -5,9 +5,11 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"toll-booth/internal/db"
 	"toll-booth/internal/handler"
+	"toll-booth/internal/middleware"
 
 	"github.com/joho/godotenv"
 )
@@ -35,7 +37,16 @@ func main() {
 	mux.HandleFunc("/redirect", handler.HandleRedirect)
 	mux.HandleFunc("/redirect-request/{shortCode}", handler.HandleRedirectRequest)
 
-	log.Fatal(http.ListenAndServe(PORT, mux))
+	srv := &http.Server{
+		Addr:         PORT,
+		Handler:      middleware.CORS(mux),
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
+	log.Printf("listening on %s", PORT)
+	log.Fatal(srv.ListenAndServe())
 
 }
 

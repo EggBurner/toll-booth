@@ -230,7 +230,7 @@ func HandleResetPassword(w http.ResponseWriter, r *http.Request) {
 		result, err := collection.UpdateOne(context.TODO(), filter, update)
 
 		if err != nil {
-			log.Fatal(err)
+			http.Error(w, "Error updating db", http.StatusInternalServerError)
 		}
 
 		log.Printf("Update found %v", result.MatchedCount)
