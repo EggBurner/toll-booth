@@ -16,14 +16,14 @@ type GetLinksRequest struct {
 }
 
 type GetLinkReuquestLinkComponent struct {
-	LinkID          bson.ObjectID    `json:"_id"`
-	TargetLink      string           `json:"targetLink"`
-	ShortCode       string           `json:"shortCode"`
-	LinkDateCreated time.Time        `json:"linkDateCreated"`
-	OwnerID         bson.ObjectID    `json:"ownerID"`
-	Status          model.StatusEnum `json:"status"`
-	VisitCount      uint32           `json:"visitCount"`
-	PinProtected    bool             `json:"pinProtected"`
+	LinkID          bson.ObjectID    `json:"_id"             bson:"_id"`
+	TargetLink      string           `json:"targetLink"      bson:"targetLink"`
+	ShortCode       string           `json:"shortCode"       bson:"shortCode"`
+	LinkDateCreated time.Time        `json:"linkDateCreated" bson:"linkDateCreated"`
+	OwnerID         bson.ObjectID    `json:"ownerID"         bson:"ownerID"`
+	Status          model.StatusEnum `json:"status"          bson:"status"`
+	VisitCount      uint32           `json:"visitCount"      bson:"visitCount"`
+	PinProtected    bool             `json:"pinProtected"    bson:"pinProtected"`
 }
 type GetLinksResponse struct {
 	Links []GetLinkReuquestLinkComponent `json:"links"`
@@ -72,7 +72,7 @@ func GetAllLinks(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	w.WriteHeader(http.StatusFound)
+	w.WriteHeader(http.StatusOK)
 
 	json.NewEncoder(w).Encode(&res)
 

@@ -20,8 +20,8 @@ type redirectResponseInfo struct {
 }
 
 type redirectRequestInfo struct {
-	ShortCode string  `json:"shortCode"`
-	Pin       *string `json:"PIN"`
+	ShortCode string  `json:"shortCode"  bson:"shortCode"`
+	Pin       *string `json:"PIN,omitempty"`
 }
 
 func HandleRedirectRequest(w http.ResponseWriter, r *http.Request) {
@@ -81,6 +81,7 @@ func HandleRedirect(w http.ResponseWriter, r *http.Request) {
 	err = result.Decode(&retrievedLink)
 	if err == mongo.ErrNoDocuments {
 		http.Error(w, "Error, no link found", http.StatusBadRequest)
+		return
 	}
 	if err != nil {
 		http.Error(w, "Error retreiving data", http.StatusInternalServerError)
@@ -89,14 +90,32 @@ func HandleRedirect(w http.ResponseWriter, r *http.Request) {
 
 	if retrievedLink.PinProtected {
 		err := auth.ComparePassword(*retrievedLink.PinHash, *redirectRequestInfo.Pin)
-		if err == nil {
-			http.Redirect(w, r, retrievedLink.TargetLink, http.StatusMovedPermanently)
-		} else {
+		if err != nil {
 			http.Error(w, "Invalid PIN", http.StatusBadRequest)
 			return
 		}
-	} else {
-		http.Redirect(w, r, retrievedLink.TargetLink, http.StatusMovedPermanently)
+	}
+	filter = bson.M{
+		"shortCode": redirectRequestInfo.ShortCode,
 	}
 
+	update := bson.M{
+		"$inc": bson.M{
+			"visitCount": 1,
+		},
+	}
+
+	collection = db.Client.Database("toll-booth-db").Collection("links")
+
+	result = collection.FindOneAndUpdate(
+		context.TODO(),
+		filter,
+		update,
+	)
+
+	if result.Err() != nil {
+		http.Error(w, "Error updating db"+result.Err().Error(), http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, retrievedLink.TargetLink, http.StatusMovedPermanently)
 }
