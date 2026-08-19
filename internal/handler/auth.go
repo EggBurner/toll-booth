@@ -28,6 +28,15 @@ type LoginRequest struct {
 	Password string `json:"password"`
 	Approved bool   `json:"approved"`
 }
+type LoginResponseUser struct {
+	UserID           bson.ObjectID  `json:"_id"`
+	FirstName        string         `json:"firstName"`
+	LastName         string         `json:"lastName"`
+	Email            string         `json:"email"`
+	ActiveLinksCount uint16         `json:"activeLinksCount"`
+	TotalLinksCount  uint32         `json:"totalLinksCount"`
+	Role             model.RoleEnum `json:"role"`
+}
 
 type ResetPasswordReuest struct {
 	Email       string `json:"email"`
@@ -135,6 +144,16 @@ func HandleLoginUser(w http.ResponseWriter, r *http.Request) {
 
 	err = collection.FindOne(context.TODO(), filter).Decode(&user)
 
+	var responseUser LoginResponseUser
+
+	responseUser.FirstName = user.FirstName
+	responseUser.LastName = user.LastName
+	responseUser.Email = user.Email
+	responseUser.ActiveLinksCount = user.ActiveLinksCount
+	responseUser.TotalLinksCount = user.TotalLinksCount
+	responseUser.UserID = user.UserID
+	responseUser.Role = user.Role
+
 	if err == mongo.ErrNoDocuments {
 		http.Error(w, "User not exists", http.StatusBadRequest)
 		return
@@ -153,11 +172,13 @@ func HandleLoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Approved {
+
 		w.WriteHeader(http.StatusOK)
 
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"message":        "Credentials valid user logged in",
 			"approvalStatus": req.Approved,
+			"user":           responseUser,
 		})
 	}
 }

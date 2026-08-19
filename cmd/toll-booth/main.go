@@ -36,6 +36,7 @@ func main() {
 	mux.HandleFunc("/shortner", handler.HandleLinkShortner)
 	mux.HandleFunc("/redirect", handler.HandleRedirect)
 	mux.HandleFunc("/redirect-request/{shortCode}", handler.HandleRedirectRequest)
+	mux.HandleFunc("/getLinks", handler.GetAllLinks)
 
 	srv := &http.Server{
 		Addr:         PORT,
