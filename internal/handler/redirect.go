@@ -117,5 +117,8 @@ func HandleRedirect(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error updating db"+result.Err().Error(), http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, retrievedLink.TargetLink, http.StatusMovedPermanently)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"targetLink": retrievedLink.TargetLink,
+		"pinMatch":   true,
+	})
 }
