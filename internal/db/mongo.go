@@ -14,10 +14,8 @@ var Client *mongo.Client
 
 func DBConnect() error {
 
-	err := godotenv.Load()
-	if err != nil {
-		return fmt.Errorf("error reading uri for db")
-	}
+	_ = godotenv.Load()
+
 	uri := os.Getenv("MONGO_URI")
 
 	if uri == "" {
