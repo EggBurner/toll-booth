@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"toll-booth/internal/db"
@@ -25,7 +26,13 @@ func main() {
 		log.Println("No .env file found, using system env vars")
 	}
 
-	PORT := os.Getenv("PORT")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	if !strings.HasPrefix(port, ":") {
+		port = ":" + port
+	}
 
 	mux := http.NewServeMux()
 
@@ -39,14 +46,14 @@ func main() {
 	mux.HandleFunc("/getLinks", handler.GetAllLinks)
 
 	srv := &http.Server{
-		Addr:         PORT,
+		Addr:         port,
 		Handler:      middleware.CORS(mux),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
 
-	log.Printf("listening on %s", PORT)
+	log.Printf("listening on %s", port)
 	log.Fatal(srv.ListenAndServe())
 
 }

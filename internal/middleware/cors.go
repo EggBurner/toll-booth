@@ -4,7 +4,8 @@ import "net/http"
 
 func CORS(next http.Handler) http.Handler {
 	allowed := map[string]bool{
-		"http://localhost:3000": true,
+		"http://localhost:3000":            true,
+		"https://toll-booth-ui.vercel.app": true,
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
